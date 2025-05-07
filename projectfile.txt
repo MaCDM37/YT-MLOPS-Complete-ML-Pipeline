@@ -1,0 +1,2 @@
+1. create a github repo and clone it to the local machine (Add experiments)
+2. add src folder along with all components (run them individually)
