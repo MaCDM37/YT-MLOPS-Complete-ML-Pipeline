@@ -3,19 +3,22 @@ import os
 from sklearn.model_selection import train_test_split
 import logging
 import yaml
+import sys
+import traceback
 
 # Ensure the "logs" directory exists
-log_dir = os.path.normpath('logs')  # 🔧 FIX: normalize path
+log_dir = 'logs'
 os.makedirs(log_dir, exist_ok=True)
 
-# Logging configuration
+
+# logging configuration
 logger = logging.getLogger('data_ingestion')
 logger.setLevel('DEBUG')
 
 console_handler = logging.StreamHandler()
 console_handler.setLevel('DEBUG')
 
-log_file_path = os.path.join(log_dir, 'data_ingestion.log')  # 🔧 FIX: normalized above
+log_file_path = os.path.join(log_dir, 'data_ingestion.log')
 file_handler = logging.FileHandler(log_file_path)
 file_handler.setLevel('DEBUG')
 
@@ -29,6 +32,7 @@ logger.addHandler(file_handler)
 def load_data(data_url: str) -> pd.DataFrame:
     """Load data from a CSV file."""
     try:
+        # df = pd.read_csv(data_url, encoding='ISO-8859-1', on_bad_lines='skip')
         url = "https://raw.githubusercontent.com/vikashishere/Datasets/main/spam.csv"
         df = pd.read_csv(url, encoding='ISO-8859-1')
         logger.debug('Data loaded from %s', data_url)
@@ -43,8 +47,8 @@ def load_data(data_url: str) -> pd.DataFrame:
 def preprocess_data(df: pd.DataFrame) -> pd.DataFrame:
     """Preprocess the data."""
     try:
-        df.drop(columns=['Unnamed: 2', 'Unnamed: 3', 'Unnamed: 4'], inplace=True)
-        df.rename(columns={'v1': 'target', 'v2': 'text'}, inplace=True)
+        df.drop(columns = ['Unnamed: 2', 'Unnamed: 3', 'Unnamed: 4'], inplace = True)
+        df.rename(columns = {'v1': 'target', 'v2': 'text'}, inplace = True)
         logger.debug('Data preprocessing completed')
         return df
     except KeyError as e:
@@ -57,8 +61,7 @@ def preprocess_data(df: pd.DataFrame) -> pd.DataFrame:
 def save_data(train_data: pd.DataFrame, test_data: pd.DataFrame, data_path: str) -> None:
     """Save the train and test datasets."""
     try:
-        data_path = os.path.normpath(data_path)  # 🔧 FIX: normalize path
-        raw_data_path = os.path.normpath(os.path.join(data_path, 'raw'))  # 🔧 FIX
+        raw_data_path = os.path.join(data_path, 'raw')
         os.makedirs(raw_data_path, exist_ok=True)
         train_data.to_csv(os.path.join(raw_data_path, "train.csv"), index=False)
         test_data.to_csv(os.path.join(raw_data_path, "test.csv"), index=False)
@@ -69,17 +72,18 @@ def save_data(train_data: pd.DataFrame, test_data: pd.DataFrame, data_path: str)
 
 def main():
     try:
-        test_size = 0.21
+        logger.debug(f"Working Directory: {os.getcwd()}")
+        test_size = 0.20
         data_url = 'https://raw.githubusercontent.com/vikashishere/Datasets/main/spam.csv'
-        output_path = os.path.normpath('./data')  # 🔧 FIX: normalize
+        output_path = './data'
 
         df = load_data(data_url=data_url)
         final_df = preprocess_data(df)
         train_data, test_data = train_test_split(final_df, test_size=test_size, random_state=2)
         save_data(train_data, test_data, data_path=output_path)
     except Exception as e:
-        logger.error('Failed to complete the data ingestion process: %s', e)
-        print(f"Error: {e}")
+        logger.error('Failed to complete the data ingestion process:\n%s', traceback.format_exc())
+        sys.exit(1)
 
 if __name__ == '__main__':
     main()
