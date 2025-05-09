@@ -1,2 +1,7 @@
 1. create a github repo and clone it to the local machine (Add experiments)
 2. add src folder along with all components (run them individually)
+3. Setting up the pipeline with dvc
+
+* Setting up dvc pipeline (without params)
+4. dvc init then to do dvc repo to test the piepline automation
+5. Now git add, commit, push
